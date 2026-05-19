@@ -14,19 +14,6 @@ python3 -m http.server 8000
 
 Or just double-click `index.html` to open it in your browser.
 
-## Deploy to Vercel via GitHub
-
-1. Create a new GitHub repo (e.g. `liquid-glass-nav`) and push these two files to its root:
-   - `index.html`
-   - `README.md`
-
-2. Go to [vercel.com/new](https://vercel.com/new) and import the repo.
-
-3. When asked for project settings, leave everything at the defaults — Vercel detects this as a static site automatically. No framework preset, no build command, no output directory.
-
-4. Click **Deploy**. You'll have a public URL in about 30 seconds.
-
-Future pushes to `main` will auto-deploy.
 
 ## Sliders
 

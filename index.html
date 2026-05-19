@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#ffffff" />
+<meta name="description" content="An interactive liquid-glass navigation prototype inspired by iOS 26's design language. Tweak the sliders to dial in the glass material." />
+<meta property="og:title" content="Liquid Glass Nav — iOS 26 prototype" />
+<meta property="og:description" content="Interactive frosted-glass navigation with live material controls." />
+<meta property="og:type" content="website" />
+<title>Liquid glass nav — iOS 26 prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* Apple-ish neutral palette */
+    --ink: #1d1d1f;
+    --ink-secondary: #6e6e73;
+    --ink-tertiary: #86868b;
+    --bg: #ffffff;
+    --hairline: rgba(0, 0, 0, 0.08);
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    font-feature-settings: "ss01", "cv11"; /* alt single-storey a, alt 1 — closer to SF Pro */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  main {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* =========================================================
+     Hero — Apple-doc-style title + lede on white
+     ========================================================= */
+  .hero {
+    padding: clamp(56px, 9vw, 112px) 0 clamp(40px, 7vw, 72px);
+  }
+  .hero .eyebrow {
+    display: inline-block;
+    margin: 0 0 16px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink-secondary);
+    text-transform: none;
+  }
+  .hero h1 {
+    margin: 0 0 20px;
+    font-size: clamp(34px, 5.8vw, 52px);
+    line-height: 1.07;
+    font-weight: 700;
+    letter-spacing: -0.022em;
+    color: var(--ink);
+  }
+  .hero .lede {
+    margin: 0;
+    font-size: clamp(17px, 1.8vw, 21px);
+    line-height: 1.47;
+    font-weight: 400;
+    color: var(--ink-secondary);
+    letter-spacing: -0.008em;
+  }
+
+  /* =========================================================
+     Stage — rounded gradient card that the hero transitions into
+     ========================================================= */
+  .stage {
+    position: relative;
+    border-radius: 28px;
+    overflow: hidden;
+    padding: clamp(64px, 10vw, 120px) 24px clamp(72px, 11vw, 128px);
+    background:
+      radial-gradient(circle at 18% 28%, #ff7eb3 0%, transparent 38%),
+      radial-gradient(circle at 78% 22%, #ffd166 0%, transparent 36%),
+      radial-gradient(circle at 22% 78%, #06d6a0 0%, transparent 40%),
+      radial-gradient(circle at 82% 80%, #4ea1ff 0%, transparent 42%),
+      radial-gradient(circle at 50% 50%, #b388ff 0%, transparent 32%),
+      #1f1d2b;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 1px 0 var(--hairline);
+  }
+  .stage::after {
+    /* Subtle grain so the backdrop reads as a photographic surface */
+    content: "";
+    position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 3px 3px;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+
+  /* =========================================================
+     Liquid Glass nav (iOS 26 — layered specular + refraction)
+     ========================================================= */
+  .nav-glass {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px;
+    border-radius: 999px;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, var(--glass-highlight, 0.5)) 0%,
+        rgba(255, 255, 255, 0) 45%
+      ),
+      rgba(255, 255, 255, var(--glass-bg, 0.45));
+    backdrop-filter:
+      blur(var(--glass-blur, 26px))
+      saturate(var(--glass-sat, 200%));
+    -webkit-backdrop-filter:
+      blur(var(--glass-blur, 26px))
+      saturate(var(--glass-sat, 200%));
+    box-shadow:
+      inset 0 1.5px 0 rgba(255, 255, 255, calc(var(--glass-edge, 0.55) + 0.1)),
+      inset 0 -4px 10px -2px rgba(255, 255, 255, calc(var(--glass-refraction, 0.18) * 1.4)),
+      inset 0 -1px 0 rgba(255, 255, 255, calc(var(--glass-refraction, 0.18) * 0.8)),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 12px 40px rgba(0, 0, 0, var(--glass-shadow, 0.22));
+  }
+  .nav-glass__item {
+    position: relative;
+    z-index: 1;
+    padding: 10px 20px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    color: rgba(0, 0, 0, 0.55);
+    cursor: pointer;
+    border: 0;
+    background: transparent;
+    transition: color 220ms var(--ease-out);
+    white-space: nowrap;
+  }
+  .nav-glass__item.is-active { color: #1a1a1a; }
+  .nav-glass__item span { display: inline-block; pointer-events: none; }
+  .nav-glass__blob {
+    position: absolute;
+    z-index: 0;
+    top: 50%; left: 0;
+    height: 36px;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.6) 0%,
+        rgba(255, 255, 255, 0.85) 50%,
+        rgba(255, 255, 255, 0.95) 100%
+      );
+    border-radius: 999px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.04),
+      0 2px 6px rgba(0, 0, 0, 0.1),
+      0 8px 22px rgba(0, 0, 0, 0.18);
+    transform: translate(var(--x, 0px), -50%);
+    width: var(--w, 0px);
+    will-change: transform, width, height;
+  }
+
+  /* =========================================================
+     Material controls — documentation-style on white
+     ========================================================= */
+  .controls-section {
+    padding: clamp(48px, 7vw, 80px) 0 clamp(64px, 9vw, 96px);
+  }
+  .controls-section h2 {
+    margin: 0 0 8px;
+    font-size: clamp(22px, 3vw, 28px);
+    line-height: 1.18;
+    font-weight: 600;
+    letter-spacing: -0.018em;
+    color: var(--ink);
+  }
+  .controls-section .section-sub {
+    margin: 0 0 32px;
+    font-size: 15px;
+    color: var(--ink-secondary);
+    line-height: 1.5;
+    max-width: 580px;
+  }
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px 40px;
+  }
+  .controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid var(--hairline);
+    padding-top: 16px;
+  }
+  .controls .ctl-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .controls .ctl-name {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: var(--ink);
+  }
+  .controls .ctl-val {
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    color: var(--ink-secondary);
+    font-weight: 500;
+  }
+  .controls input[type="range"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 999px;
+    cursor: pointer;
+    outline: none;
+  }
+  .controls input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--ink);
+    cursor: pointer;
+    transition: transform 120ms ease-out;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  }
+  .controls input[type="range"]::-webkit-slider-thumb:active {
+    transform: scale(1.15);
+  }
+  .controls input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--ink);
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  }
+  .controls-footer {
+    margin-top: 32px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .ctl-reset {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 0;
+    background: var(--ink);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    transition: background 160ms ease-out, transform 120ms ease-out;
+  }
+  .ctl-reset:hover { background: #000; }
+  .ctl-reset:active { transform: scale(0.97); }
+
+  /* =========================================================
+     Footer
+     ========================================================= */
+  footer {
+    border-top: 1px solid var(--hairline);
+    padding: 32px 0 48px;
+    font-size: 12px;
+    color: var(--ink-tertiary);
+    letter-spacing: -0.005em;
+  }
+
+  @media (max-width: 540px) {
+    main { padding: 0 16px; }
+    .hero { padding: 40px 0 32px; }
+    .stage { border-radius: 20px; padding: 56px 16px 64px; }
+    .controls { grid-template-columns: 1fr; gap: 16px; }
+    .nav-glass__item { padding: 9px 14px; }
+  }
+</style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div class="eyebrow">iOS 26 Prototype</div>
+      <h1>Liquid glass navigation</h1>
+      <p class="lede">An interactive frosted-glass navigation inspired by Apple's Liquid Glass design language. Click between the labels to feel the pill morph, then dial the sliders below to tune the material in real time.</p>
+    </section>
+
+    <section class="stage" aria-label="Interactive demo">
+      <nav class="nav-glass" aria-label="Liquid glass navigation">
+        <span class="nav-glass__blob" aria-hidden="true"></span>
+        <button class="nav-glass__item is-active"><span>Home</span></button>
+        <button class="nav-glass__item"><span>About</span></button>
+        <button class="nav-glass__item"><span>Playground</span></button>
+        <button class="nav-glass__item"><span>Contact</span></button>
+      </nav>
+    </section>
+
+    <section class="controls-section" aria-label="Material controls">
+      <h2>Material</h2>
+      <p class="section-sub">Each slider drives a single CSS custom property. Defaults match iOS's Regular Material with the new iOS 26 layered specular highlight.</p>
+
+      <div class="controls" id="controls">
+        <label>
+          <div class="ctl-row"><span class="ctl-name">Blur</span><span class="ctl-val" data-val="--glass-blur">26px</span></div>
+          <input type="range" min="0" max="50" step="1" value="26" data-var="--glass-blur" data-unit="px" aria-label="Blur" />
+        </label>
+        <label>
+          <div class="ctl-row"><span class="ctl-name">Saturation</span><span class="ctl-val" data-val="--glass-sat">200%</span></div>
+          <input type="range" min="50" max="250" step="5" value="200" data-var="--glass-sat" data-unit="%" aria-label="Saturation" />
+        </label>
+        <label>
+          <div class="ctl-row"><span class="ctl-name">Base opacity</span><span class="ctl-val" data-val="--glass-bg">0.45</span></div>
+          <input type="range" min="0" max="1" step="0.01" value="0.45" data-var="--glass-bg" aria-label="Base opacity" />
+        </label>
+        <label>
+          <div class="ctl-row"><span class="ctl-name">Top highlight</span><span class="ctl-val" data-val="--glass-highlight">0.50</span></div>
+          <input type="range" min="0" max="1" step="0.01" value="0.50" data-var="--glass-highlight" aria-label="Top highlight" />
+        </label>
+        <label>
+          <div class="ctl-row"><span class="ctl-name">Edge highlight</span><span class="ctl-val" data-val="--glass-edge">0.55</span></div>
+          <input type="range" min="0" max="1" step="0.01" value="0.55" data-var="--glass-edge" aria-label="Edge highlight" />
+        </label>
+        <label>
+          <div class="ctl-row"><span class="ctl-name">Refraction</span><span class="ctl-val" data-val="--glass-refraction">0.18</span></div>
+          <input type="range" min="0" max="0.5" step="0.01" value="0.18" data-var="--glass-refraction" aria-label="Refraction" />
+        </label>
+        <label>
+          <div class="ctl-row"><span class="ctl-name">Shadow</span><span class="ctl-val" data-val="--glass-shadow">0.22</span></div>
+          <input type="range" min="0" max="0.5" step="0.01" value="0.22" data-var="--glass-shadow" aria-label="Shadow" />
+        </label>
+      </div>
+
+      <div class="controls-footer">
+        <button class="ctl-reset" id="reset">Reset to defaults</button>
+      </div>
+    </section>
+
+    <footer>
+      Built with vanilla HTML, CSS, and JavaScript. No frameworks, no build step.
+    </footer>
+  </main>
+
+<script>
+(() => {
+  // ----- Morph animation: contract to dot, travel, bloom back -----
+  const MORPH_DURATION = 480;
+  const MORPH_EASING = 'linear(0, 0.034 3%, 0.123 6%, 0.262 10%, 0.45 15%, 0.66 21%, 0.85 28%, 0.97 35%, 1.022 41%, 1.03 46%, 1.022 52%, 1.005 62%, 0.998 75%, 1)';
+  const TEXT_PAD = 18;
+  const DOT_SIZE = 8;
+  const PILL_HEIGHT = 36;
+
+  const nav = document.querySelector('.nav-glass');
+  const blob = nav.querySelector('.nav-glass__blob');
+  const items = nav.querySelectorAll('button.nav-glass__item');
+  let runningAnim = null;
+
+  const measure = (item) => {
+    const span = item.querySelector('span') || item;
+    let x = 0;
+    let el = span;
+    while (el && el !== nav) {
+      x += el.offsetLeft;
+      el = el.offsetParent;
+    }
+    return { x: x - TEXT_PAD, w: span.offsetWidth + TEXT_PAD * 2 };
+  };
+  const settle = (m) => {
+    blob.style.setProperty('--x', `${m.x}px`);
+    blob.style.setProperty('--w', `${m.w}px`);
+  };
+  const init = () => settle(measure(nav.querySelector('.is-active')));
+  const morph = (from, to) => {
+    if (runningAnim) runningAnim.cancel();
+    const midX = (from.x + from.w / 2 + to.x + to.w / 2) / 2 - DOT_SIZE / 2;
+    const anim = blob.animate(
+      [
+        { transform: `translate(${from.x}px, -50%)`, width: `${from.w}px`, height: `${PILL_HEIGHT}px` },
+        { transform: `translate(${midX}px, -50%)`, width: `${DOT_SIZE}px`, height: `${DOT_SIZE}px`, offset: 0.5 },
+        { transform: `translate(${to.x}px, -50%)`, width: `${to.w}px`, height: `${PILL_HEIGHT}px` },
+      ],
+      { duration: MORPH_DURATION, easing: MORPH_EASING, fill: 'forwards' }
+    );
+    runningAnim = anim;
+    anim.onfinish = () => { settle(to); anim.cancel(); };
+  };
+
+  items.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const prev = nav.querySelector('.is-active');
+      if (prev === btn) return;
+      const from = measure(prev);
+      items.forEach((b) => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      morph(from, measure(btn));
+    });
+  });
+
+  requestAnimationFrame(init);
+  window.addEventListener('resize', init);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(init);
+
+  // ----- Slider → CSS variable wiring -----
+  const formatVal = (val, unit) => {
+    if (unit === 'px') return `${Math.round(parseFloat(val))}px`;
+    if (unit === '%') return `${Math.round(parseFloat(val))}%`;
+    return parseFloat(val).toFixed(2);
+  };
+  const panel = document.getElementById('controls');
+  const defaults = {};
+  panel.querySelectorAll('input[data-var]').forEach((input) => {
+    defaults[input.dataset.var] = input.value;
+  });
+  const apply = (cssVar, raw, unit) => {
+    const value = unit ? `${raw}${unit}` : raw;
+    nav.style.setProperty(cssVar, value);
+    // Some browsers cache backdrop-filter when driven only by CSS variables.
+    // Re-apply the full filter inline whenever blur or saturation changes
+    // so the visual update is guaranteed.
+    if (cssVar === '--glass-blur' || cssVar === '--glass-sat') {
+      const blur = nav.style.getPropertyValue('--glass-blur') || '26px';
+      const sat = nav.style.getPropertyValue('--glass-sat') || '200%';
+      const filter = `blur(${blur}) saturate(${sat})`;
+      nav.style.backdropFilter = filter;
+      nav.style.webkitBackdropFilter = filter;
+    }
+    const display = panel.querySelector(`[data-val="${cssVar}"]`);
+    if (display) display.textContent = formatVal(raw, unit);
+  };
+  panel.querySelectorAll('input[type="range"]').forEach((input) => {
+    const cssVar = input.dataset.var;
+    const unit = input.dataset.unit || '';
+    apply(cssVar, input.value, unit);
+    input.addEventListener('input', () => apply(cssVar, input.value, unit));
+  });
+  document.getElementById('reset').addEventListener('click', () => {
+    panel.querySelectorAll('input[data-var]').forEach((input) => {
+      input.value = defaults[input.dataset.var];
+      apply(input.dataset.var, input.value, input.dataset.unit || '');
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -322,10 +322,45 @@
 
   @media (max-width: 540px) {
     main { padding: 0 16px; }
-    .hero { padding: 40px 0 32px; }
-    .stage { border-radius: 20px; padding: 56px 16px 64px; }
-    .controls { grid-template-columns: 1fr; gap: 16px; }
-    .nav-glass__item { padding: 9px 14px; }
+
+    /* Hero — tighter rhythm on mobile */
+    .hero { padding: 32px 0 24px; }
+
+    /* Stage — much tighter padding so the nav doesn't float in a sea
+       of empty gradient. Also reduce border radius and add subtle
+       gap below to separate from the controls section. */
+    .stage {
+      border-radius: 18px;
+      padding: 36px 14px 40px;
+    }
+
+    /* Glass nav — slightly smaller so it fits snugly inside the
+       narrower stage without crowding the edges */
+    .nav-glass { padding: 6px; gap: 2px; }
+    .nav-glass__item {
+      padding: 8px 12px;
+      font-size: 13px;
+      letter-spacing: -0.15px;
+    }
+
+    /* Controls — single column already collapses; tighten spacing */
+    .controls-section { padding: 36px 0 48px; }
+    .controls-section h2 { font-size: 22px; }
+    .controls-section .section-sub {
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .controls { grid-template-columns: 1fr; gap: 18px; }
+    .controls-footer { padding-top: 24px; margin-top: 4px; }
+
+    /* Footer — tighter */
+    footer { padding: 24px 0 36px; }
+  }
+
+  /* Very narrow viewports — keep things from feeling cramped */
+  @media (max-width: 380px) {
+    .nav-glass__item { padding: 7px 10px; font-size: 12.5px; }
+    .stage { padding: 32px 12px 36px; }
   }
 </style>
 </head>

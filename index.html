@@ -211,6 +211,18 @@
     line-height: 1.5;
     max-width: 580px;
   }
+  /* Minimal mode: hide hero copy + controls header. Used when the page
+     is embedded inside another site (e.g. Framer portfolio) where the
+     surrounding context already provides the title and description.
+     Activated by appending ?minimal=1 to the URL. */
+  body.is-minimal .hero,
+  body.is-minimal .controls-section > h2,
+  body.is-minimal .controls-section > .section-sub {
+    display: none;
+  }
+  body.is-minimal .controls-section {
+    padding-top: clamp(24px, 4vw, 40px);
+  }
   .controls {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -382,6 +394,13 @@
 
 <script>
 (() => {
+  // ----- Minimal embed mode -----
+  // ?minimal=1 hides the hero copy + controls header so the page can be
+  // embedded inside a portfolio/Framer site without redundant titling.
+  if (new URLSearchParams(location.search).get('minimal') === '1') {
+    document.body.classList.add('is-minimal');
+  }
+
   // ----- Morph animation: contract to dot, travel, bloom back -----
   const MORPH_DURATION = 480;
   const MORPH_EASING = 'linear(0, 0.034 3%, 0.123 6%, 0.262 10%, 0.45 15%, 0.66 21%, 0.85 28%, 0.97 35%, 1.022 41%, 1.03 46%, 1.022 52%, 1.005 62%, 0.998 75%, 1)';

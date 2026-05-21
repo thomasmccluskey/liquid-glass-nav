@@ -223,6 +223,22 @@
   body.is-minimal .controls-section {
     padding-top: clamp(24px, 4vw, 40px);
   }
+  /* Stretch the page to fill any iframe height so the embed never shows
+     blank space below the controls. main becomes a flex column and the
+     controls section grows to soak up remaining viewport. */
+  body.is-minimal {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  body.is-minimal main {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  body.is-minimal .controls-section {
+    flex: 1 1 auto;
+  }
   .controls {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
